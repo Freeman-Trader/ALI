@@ -34,6 +34,7 @@
 # Misc
 *.vscode
 *.o
+./Main
 
 
 # Solution Stolen from VenomVendor on StackOverflow
