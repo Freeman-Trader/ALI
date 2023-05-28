@@ -33,7 +33,7 @@
 
 # Misc
 *.vscode
-#*.o
+*.o
 
 
 # Solution Stolen from VenomVendor on StackOverflow
