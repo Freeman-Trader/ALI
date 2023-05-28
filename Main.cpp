@@ -20,7 +20,7 @@ int main(void)
 	for (int loop1 = 0; loop1 < 10; loop1++)
 	{
 		std::cout << "Loop: " << loop1 << std::endl;
-		for (int loop2 = 0; loop2 < loop1; loop2++)
+		for (int loop2 = 0; loop2 <= loop1; loop2++)
 		{
 			Input = std::to_string(loop1);
 			Input += '+';
