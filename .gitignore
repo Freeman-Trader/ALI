@@ -33,4 +33,15 @@
 
 # Misc
 *.vscode
-Main
+*.o
+
+
+# Solution Stolen from VenomVendor on StackOverflow
+# Ignore all
+#*
+
+# Unignore all with extensions
+#!*.*
+
+# Unignore all dirs
+#!*/
