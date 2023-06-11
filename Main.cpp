@@ -4,61 +4,55 @@
 int main(void)
 {
 	Brain Ali;
-	std::string Input;// = "9+7=";
-	std::string desiredOutput;// = "16";
-	std::string actualOutput;
+	
+	Ali.testPathway();
 
-	Ali.createDesiredPathway(Input, desiredOutput);
 
-	/*for (int loop = 0; loop < 100; loop++)
+
+
+
+	/*
+	//Computer Vision Test
+	bool BWMatrix[5][5];
+	
+	BWMatrix[0][0] = false;
+	BWMatrix[1][0] = true;
+	BWMatrix[2][0] = true;
+	BWMatrix[3][0] = true;
+	BWMatrix[4][0] = false;
+	BWMatrix[0][1] = false;
+	BWMatrix[1][1] = true;
+	BWMatrix[2][1] = false;
+	BWMatrix[3][1] = false;
+	BWMatrix[4][1] = false;
+	BWMatrix[0][2] = false;
+	BWMatrix[1][2] = true;
+	BWMatrix[2][2] = true;
+	BWMatrix[3][2] = true;
+	BWMatrix[4][2] = false;
+	BWMatrix[0][3] = false;
+	BWMatrix[1][3] = true;
+	BWMatrix[2][3] = false;
+	BWMatrix[3][3] = false;
+	BWMatrix[4][3] = false;
+	BWMatrix[0][4] = false;
+	BWMatrix[1][4] = true;
+	BWMatrix[2][4] = true;
+	BWMatrix[3][4] = true;
+	BWMatrix[4][4] = false;
+	
+	for(int y = 0; y < 5; y++)
 	{
-		Ali.followPathway(Input, actualOutput);
-		std::cout << actualOutput << std::endl;
-		actualOutput.clear();
-	}*/
-
-	for (int loop1 = 0; loop1 < 10; loop1++)
-	{
-		std::cout << "Loop: " << loop1 << std::endl;
-		for (int loop2 = 0; loop2 <= loop1; loop2++)
+		for(int x = 0; x < 5; x++)
 		{
-			Input = std::to_string(loop1);
-			Input += '+';
-			Input += std::to_string(loop2);
-			//Input += '=';
-
-			int tempInt = 0;
-			tempInt = loop1 + loop2;
-			desiredOutput = std::to_string(tempInt);
-
-			Ali.createDesiredPathway(Input, desiredOutput);
+			if(BWMatrix[x][y] == true)
+				std::cout << "=";
+			else
+				std::cout << " ";
 		}
-	}
-
-
-	while (true)
-	{
-		std::cin >> Input;
-		//Input = "4+3=";
-
-		if (Input == "EXIT")
-			return 0;
-		
-		Ali.followPathway(Input, actualOutput);
-		std::cout << actualOutput << std::endl;
-		Ali.resetBreakCount(Input);
-		actualOutput.clear();
-	}
-
-	/*for(int loop = 0; loop < 1000; loop++)
-	{
-		Ali.createPathway("1+2", "2");
-  		Ali.randomizePathway("1+1");
-		Ali.followPathway("1+1");
 		std::cout << std::endl;
-		std::cout << std::endl;
-		std::cout << "------------------------------------------------------------" << std::endl;
-	}*/
-
+	}
+	*/
+	
 	return 0;
 }
