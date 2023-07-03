@@ -5,7 +5,7 @@ int main(void)
 {
 	Brain Ali;
 	
-	Ali.testPathway();
+	Ali.testDesiredPathwayFunction();
 
 
 

@@ -18,6 +18,7 @@ private:
 	//IO Data Members
 	IOType mNeuronType;
 	char mNeuronSymbol;
+	bool mActivated;
 
 	//Neuron Connections
 	unsigned int mThreshold;
@@ -40,6 +41,7 @@ public:
 	//Getters
 	IOType getNeuronType(void) const;
 	char getNeuronSymbol(void) const;
+	bool getActivation(void) const;
 	unsigned int getThreshold(void) const;
 	unsigned int getBreakCount(void) const;
 	Neuron* getConnection(unsigned int const Index) const;
@@ -47,6 +49,7 @@ public:
 	int getFirstNullIndex(void);
 
 	//Etc
+	//std::vector<Neuron*> Synapse(std::string& Output);
 	void Synapse(std::string& Output);
 	void Reset(void);
 };
@@ -57,6 +60,7 @@ Neuron::Neuron() {
 	//std::cout << "Created New Neuron" << std::endl;
 	this->mNeuronType = Transitive;
 	this->mNeuronSymbol = '-';
+	this->mActivated = false;
 	this->mThreshold = rand() % ThresholdRange;
 	this->mBreakCount = 0;
 	for (int Index = 0; Index < NumConnections; Index++)
@@ -118,6 +122,9 @@ IOType Neuron::getNeuronType(void) const {
 char Neuron::getNeuronSymbol(void) const {
 	return this->mNeuronSymbol;
 }
+bool Neuron::getActivation(void) const {
+	return this->mActivated;
+}
 unsigned int Neuron::getThreshold(void) const {
 	return this->mThreshold;
 }
@@ -159,8 +166,10 @@ int Neuron::getFirstNullIndex(void) {
 
 
 //Etc
-void Neuron::Synapse(std::string& Output) 
+//std::vector<Neuron*> Neuron::Synapse(std::string& Output) 
+void Neuron::Synapse(std::string& Output)
 {
+	//std::vector<Neuron*> OutputNeuronVector;
 	if (this->mBreakCount < this->mThreshold)
 	{
 		this->mBreakCount++;
@@ -169,21 +178,29 @@ void Neuron::Synapse(std::string& Output)
 	if (this->mBreakCount >= this->mThreshold)
 	{
 		this->mBreakCount = 0;
+		this->mActivated = true;
 		if (this->mNeuronType == (IOType)2)
 		{
 			Output.push_back(this->mNeuronSymbol);
 			//std::cout << this->mNeuronSymbol;
+			//OutputNeuronVector.push_back(this);
+			//return OutputNeuronVector;
 		}
 		for (int Index = 0; Index < NumConnections && this->mpConnections[Index] != nullptr; Index++)
 		{
+			//this->mpConnections[Index]->Synapse(Output).begin();
+			//if(OutputNeuronVector.size() != 0)
+				//OutputNeuronVector.insert(OutputNeuronVector.end(), this->mpConnections[Index]->Synapse(Output).begin(), this->mpConnections[Index]->Synapse(Output).end());
 			this->mpConnections[Index]->Synapse(Output);
 		}
 	}
+	//return OutputNeuronVector;
 }
 
 void Neuron::Reset(void)
 {
 	this->mBreakCount = 0;
+	this->mActivated = false;
 
 	for (int Index = 0; Index < NumConnections && this->mpConnections[Index] != nullptr; Index++)
 	{

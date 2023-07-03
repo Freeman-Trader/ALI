@@ -3,6 +3,7 @@
 
 #define INPUTARRAYSIZE 128
 #define BRAINARRAYSIZE 100
+#define OUTPUTARRAYSIZE 1000
 
 #include <string>
 #include <vector>
@@ -12,7 +13,8 @@ class Brain
 {
 private:
 	Neuron* InputNetwork[INPUTARRAYSIZE]; //Create Multiple Networks to Handle Different Tasks
-	Neuron* NeuralNetwork[BRAINARRAYSIZE][BRAINARRAYSIZE];
+	//Neuron* NeuralNetwork[BRAINARRAYSIZE][BRAINARRAYSIZE];
+	Neuron* OutputNetwork[OUTPUTARRAYSIZE];
 public:
 	//Constructors & Destructors
 	Brain();
@@ -33,7 +35,7 @@ public:
 	//Also change createPathway() to store all possible inputs in array rather than dynamically
 	//A relearn function to to hopefully find a faster pathway
 	
-	void followPathway(std::string Input, std::string& Output);
+	std::vector<Neuron*> followPathway(std::string Input, std::string& Output);
 	void resetBreakCount(std::string Input); //Resets only the Neurons of this path
 	void resetBreakCount(void); //Resets All Neurons
 	void randomizePathway(std::string Input);
@@ -43,6 +45,10 @@ Brain::Brain() {
 	for (int Index = 0; Index < INPUTARRAYSIZE; Index++)
 	{
 		this->InputNetwork[Index] = nullptr;
+	}
+	for (int Index = 0; Index < OUTPUTARRAYSIZE; Index++)
+	{
+		this->OutputNetwork[Index] = nullptr;
 	}
 }
 
@@ -126,20 +132,89 @@ void Brain::createDesiredPathway(std::string Input, std::string Output)
 		for (int Index0 = 0; Index0 < Output.length(); Index0++)
 		{
 			Neuron* nNeuron = new Neuron;
+			
+			//Puts newly created neuron into Output Array
+			int Index1;
+			for(Index1 = 0; Index1 < OUTPUTARRAYSIZE && OutputNetwork[Index1] != nullptr; Index1++)
+			{}
+			if(Index1 == OUTPUTARRAYSIZE)
+				std::cout << "Output Array Maxed Out" << std::endl;
+			else
+				OutputNetwork[Index1] = nNeuron;
+			
 			nNeuron->setNeuronType((IOType)2);
 			nNeuron->setBreakCount(0);
 			nNeuron->setThreshold(Output.length());
 			nNeuron->setNeuronSymbol(Output[Index0]);
 
-			for (int Index1 = 0; Index1 < Output.length(); Index1++)
+			for (int Index1 = 0; Index1 < Output.length(); Index1++) //Leads to double output w/ the '<=' vs a '<'
 			{
 				Past[Index1]->setConnection(nNeuron);
 			}
 		}
 	}
 
-	//Tunes mThreshold of Neurons til desired outcome is achieved
 	std::string actualOutput;
+	//std::vector<Neuron*> OutputNeuronVector = followPathway(Input, actualOutput);
+	followPathway(Input, actualOutput);
+	while (actualOutput != Output)
+	{
+		if(false) //Need to add check that verifies there are neurons in output array
+		{
+			std::cout << "No Output Neurons Found" << std::endl;
+		}
+		else //Readjusts Output array so that old outputs are subsituted with new ones
+		{
+			std::vector<Neuron*> TempOutputVector;
+			for (int Index0 = 0; Index0 < OUTPUTARRAYSIZE; Index0++)
+			{
+				if(OutputNetwork[Index0] != nullptr && OutputNetwork[Index0]->getActivation())
+				{
+					TempOutputVector.push_back(OutputNetwork[Index0]);
+					OutputNetwork[Index0]->setNeuronType((IOType)1);
+					OutputNetwork[Index0] = nullptr;
+				}
+			}
+		
+			for (int Index0 = 0; Index0 < Output.length(); Index0++)
+			{
+				Neuron* nNeuron = new Neuron;
+				
+				//Puts newly created neuron into Output Array
+				int Index1;
+				for(Index1 = 0; Index1 < OUTPUTARRAYSIZE && OutputNetwork[Index1] != nullptr; Index1++)
+				{}
+				if(Index1 == OUTPUTARRAYSIZE)
+					std::cout << "Output Array Maxed Out" << std::endl;
+				else
+					OutputNetwork[Index1] = nNeuron;
+				
+				nNeuron->setNeuronType((IOType)2);
+				nNeuron->setBreakCount(0);
+				nNeuron->setThreshold(TempOutputVector.size());
+				nNeuron->setNeuronSymbol(Output[Index0]);
+	
+				for (int Index1 = 0; Index1 < TempOutputVector.size(); Index1++)
+				{
+					TempOutputVector[Index1]->setConnection(nNeuron);
+					TempOutputVector[Index1]->setNeuronType((IOType)1);
+				}
+			}
+		}
+		std::cout << Output << std::endl;
+		std::cout << actualOutput << std::endl;
+		this->resetBreakCount(Input);
+		actualOutput.clear();
+		followPathway(Input, actualOutput);
+	}
+
+
+
+
+
+
+	//Tunes mThreshold of Neurons til desired outcome is achieved
+	/*std::string actualOutput;
 	followPathway(Input, actualOutput);
 	while (actualOutput != Output)
 	{
@@ -159,7 +234,7 @@ void Brain::createDesiredPathway(std::string Input, std::string Output)
 		
 		actualOutput.clear();
 		followPathway(Input, actualOutput);
-	}
+	}*/
 }
 
 void Brain::testDesiredPathwayFunction(void)
@@ -171,7 +246,7 @@ void Brain::testDesiredPathwayFunction(void)
 
 	Ali.createDesiredPathway(Input, desiredOutput);
 
-	for (int loop1 = 0; loop1 < 10; loop1++)
+	for (int loop1 = 0; loop1 < 2; loop1++)
 	{
 		std::cout << "Loop: " << loop1 << std::endl;
 		for (int loop2 = 0; loop2 <= loop1; loop2++)
@@ -188,7 +263,12 @@ void Brain::testDesiredPathwayFunction(void)
 			Ali.createDesiredPathway(Input, desiredOutput);
 		}
 	}
-
+	
+	//Ali.createDesiredPathway("Hello", "Hi");
+	//Ali.createDesiredPathway("Hi", "Hello");
+	//Ali.createDesiredPathway("How are you doing?", "I'm doing good, thanks for asking");
+	//^Possibly seperate sentences into words
+	
 	while (true)
 	{
 		std::cin >> Input;
@@ -246,8 +326,10 @@ void Brain::createRandomPathway(std::string Input[], std::string Output[])
 	}
 }
 
-void Brain::followPathway(std::string Input, std::string& Output)
+std::vector<Neuron*> Brain::followPathway(std::string Input, std::string& Output)
 {
+	std::vector<Neuron*> OutputNeuronVector;
+	
 	for (int Index1 = 0; Index1 < Input.length(); Index1++)
 	{
 		int Index2 = 0;
@@ -259,13 +341,14 @@ void Brain::followPathway(std::string Input, std::string& Output)
 		if (Index2 >= INPUTARRAYSIZE)
 		{
 			std::cout << "Input Not Found" << std::endl;
-			return;
 		}
 		else if (Index2 < INPUTARRAYSIZE && this->InputNetwork[Index2] != nullptr)
 		{
 			this->InputNetwork[Index2]->Synapse(Output);
+			//OutputNeuronVector.insert(OutputNeuronVector.end(), this->InputNetwork[Index2]->Synapse(Output).begin(), this->InputNetwork[Index2]->Synapse(Output).end());
 		}
 	}
+	return OutputNeuronVector;
 }
 
 void Brain::resetBreakCount(std::string Input)
