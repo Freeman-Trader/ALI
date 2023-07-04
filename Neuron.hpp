@@ -175,7 +175,7 @@ void Neuron::Synapse(std::string& Output)
 		this->mBreakCount++;
 	}
 
-	if (this->mBreakCount >= this->mThreshold)
+	if (this->mBreakCount >= this->mThreshold && !this->mActivated)
 	{
 		this->mBreakCount = 0;
 		this->mActivated = true;
