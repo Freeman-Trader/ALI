@@ -1,5 +1,4 @@
-1. Need to create a OutputArray for Output neurons for easy manipualtion rather than trying
-    to constantly find them
+1. Need to create an algorithem that will create duplicate input neurons since each neuron can only fire once for a single input 
     
 2. Look into line 134 of Brain.hpp
 
