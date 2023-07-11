@@ -3,3 +3,5 @@
 2. Look into line 134 of Brain.hpp
 
 3. Tidy up code
+
+4. Look into modifing neuron class such that it has a negative breakcount rather than only being able to activate once.
