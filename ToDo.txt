@@ -1,6 +1,6 @@
 1. Need to create an algorithem that will create duplicate input neurons since each neuron can only fire once for a single input 
     
-2. Look into line 134 of Brain.hpp
+2. Look into line 151 of Brain.hpp
 
 3. Tidy up code
 
