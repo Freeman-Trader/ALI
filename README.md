@@ -1,15 +1,15 @@
 # Artificial Living Intelligence (ALI)
-## Contribuators
+## Contributors
 * Freeman Trader - github.com/Freeman-Trader
 
 ## Methodology
-This project aims to emulate (and possibly simulate) the workings of a human brain in hopes to recreate human intelligence and creativity. We plan on doing this by simulating neurons and the structures they form as closely as possible.
+This project aims to emulate (and possibly simulate) the workings of a human brain in hopes of recreating human intelligence and creativity. We plan on doing this by simulating neurons and the structures they form as closely as possible.
 
 ## Design
 ### Neurons
 The core idea of a neuron is that it receives charges from its neighboring neurons through synapses, building up its own charge. Once the charge of a neuron passes a certain threshold, an all-or-nothing reaction occurs, making that same neuron emit its own charge (called an action potential), progressing the chain reaction.
 
-* The neuron has 2 main components, the Dendrite and the Axon. The Dendrite receives the charges while the Axon emits charge. [1]
+* The neuron has 2 main components, the Dendrite and the Axon. The Dendrite receives the charges while the Axon emits the charge. [1]
 
 ![Neuron Architecture](README-data/NeuronArchitecture.jpg)
 
@@ -19,16 +19,16 @@ The core idea of a neuron is that it receives charges from its neighboring neuro
 
 ![Neuron Types](README-data/TypesOfNeurons.jpg)
 
-* Neurons can emit neurotransmitters that excite or inhibit the neurons they are connected to. They terms used for this are respectively called excitatory postsynaptic potential (EPSP) and inhibitory postsynaptic potential (IPSP). [3]
+* Neurons can emit neurotransmitters that excite or inhibit the neurons they are connected to. The terms used for this are respectively called excitatory postsynaptic potential (EPSP) and inhibitory postsynaptic potential (IPSP). [3]
 
 ![Action Potential](README-data/IPSPsummation.jpg)
 
 ### Synapses
-Synapses are what connects neurons to other cells such as neurons and muscles. There are 3 components that make up a synapse: A Presynaptic Terminal which is the part of the axon that emits neurotransmitters; A Postsynaptic Membrane which is the membrane  that receives the neurotransmitters; A Synaptic Cleft which is the gap between the aforementioned terminal and membrane.
+Synapses are what connect neurons to other cells such as neurons and muscles. There are 3 components that make up a synapse: A Presynaptic Terminal which is the part of the axon that emits neurotransmitters; A Postsynaptic Membrane which is the membrane  that receives the neurotransmitters; A Synaptic Cleft which is the gap between the aforementioned terminal and membrane.
 
-* Neurotransmitters are chemicals that are release from the presynaptic terminal and bind to the postsynaptic membrane, changing the electrical potential of the postsynaptic cell.
+* Neurotransmitters are chemicals that are released from the presynaptic terminal and bind to the postsynaptic membrane, changing the electrical potential of the postsynaptic cell.
 
-* There are 2 types of synapses, chemical and electrical. Chemical synapses use the above method of communication whereas electrical synapse directly link 2 neurons.
+* There are 2 types of synapses, chemical and electrical. Chemical synapses use the above method of communication whereas electrical synapses directly link 2 neurons.
 
 **Sources**
 * [1] [NIH](https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-life-and-death-neuron)
