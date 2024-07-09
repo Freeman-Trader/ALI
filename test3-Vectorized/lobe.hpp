@@ -2,8 +2,8 @@
 #pragma once
 
 #include "neuron.hpp"
-#include <string>
-#include <vector>
+//#include <string>
+//#include <vector>
 
 typedef enum ChangeType {
 	None = 0, Add = 1, Remove = 2
@@ -17,7 +17,7 @@ private:
 	std::vector<Neuron*> mInputNeurons;
 
 	ChangeType mLastChange;
-	Neuron* mTempChildPointer;
+	Synapse mTempChildPointer;
 	Neuron* mTempParentPointer;
 
 public:
@@ -55,7 +55,6 @@ Lobe::Lobe() {
 	if (nNeuron->getNeuronType() == (IOType)Input)
 		this->mInputNeurons.push_back(nNeuron);
 }
-
 Lobe::Lobe(unsigned int nMaxNeurons) {
 	this->mMaxNeurons = nMaxNeurons;
 	this->mAllNeurons.clear();
@@ -67,7 +66,6 @@ Lobe::Lobe(unsigned int nMaxNeurons) {
 	if (nNeuron->getNeuronType() == (IOType)Input)
 		this->mInputNeurons.push_back(nNeuron);
 }
-
 Lobe::~Lobe() {
 	for (size_t Index = 0; Index < this->mAllNeurons.size(); Index++) {
 		free(this->mAllNeurons[Index]);
@@ -110,28 +108,34 @@ void Lobe::randomChange(void) {
 
 void Lobe::addNeuron(void) {
 	Neuron* parentNeuron = this->getRandomNeuron();
-	Neuron* nNeuron = new Neuron;
+	Synapse childSynapse;
 	
-	this->mAllNeurons.push_back(nNeuron);
-	if (nNeuron->getNeuronType() == (IOType)Input)
-		this->mInputNeurons.push_back(nNeuron);
+	childSynapse.pChild = new Neuron;
+	childSynapse.Strength = rand() % 15;
+	
+	this->mAllNeurons.push_back(childSynapse.pChild);
+	if (childSynapse.pChild->getNeuronType() == (IOType)Input)
+		this->mInputNeurons.push_back(childSynapse.pChild);
 
-	parentNeuron->setChild(nNeuron);
+	parentNeuron->setNewChild(childSynapse);
 
 	this->mLastChange = (ChangeType)Add;
 	this->mTempParentPointer = parentNeuron;
-	this->mTempChildPointer = nNeuron;
+	this->mTempChildPointer = childSynapse;
 }
 
 void Lobe::addConnection(void) {
 	Neuron* parentNeuron = this->getRandomNeuron();
-	Neuron* childNeuron = this->getRandomNeuron();
+	Synapse childSynapse;
+	
+	childSynapse.pChild = this->getRandomNeuron();
+	childSynapse.Strength = rand() % 15;
 
-	parentNeuron->setChild(childNeuron);
+	parentNeuron->setNewChild(childSynapse);
 
 	this->mLastChange = (ChangeType)Add;
 	this->mTempParentPointer = parentNeuron;
-	this->mTempChildPointer = childNeuron;
+	this->mTempChildPointer = childSynapse;
 }
 
 void Lobe::removeConnection(void) {
@@ -139,9 +143,9 @@ void Lobe::removeConnection(void) {
 	if(parentNeuron->getNumberOfChildren() <= 0)
 		return;
 	unsigned int randomIndex = rand() % parentNeuron->getNumberOfChildren();
-	Neuron* childNeuron = parentNeuron->getChild(randomIndex);
+	Synapse childNeuron = parentNeuron->getChild(randomIndex);
 
-	parentNeuron->setChild(nullptr, randomIndex);
+	parentNeuron->deleteChild(randomIndex);
 
 	this->mLastChange = (ChangeType)Remove;
 	this->mTempParentPointer = parentNeuron;
@@ -151,29 +155,29 @@ void Lobe::removeConnection(void) {
 void Lobe::undoChange(void) {
 	if (this->mLastChange == (ChangeType)Add) {
 		unsigned int childIndex = this->mTempParentPointer->getChildIndex(this->mTempChildPointer);
-		this->mTempParentPointer->setChild(nullptr, childIndex);
-		free(this->mTempChildPointer); // Possible error inducing code
+		this->mTempParentPointer->deleteChild(childIndex);
+		free(this->mTempChildPointer.pChild); // Possible error inducing code
 	}
 	else if (this->mLastChange == (ChangeType)Remove) {
-		this->mTempParentPointer->setChild(this->mTempChildPointer);
+		this->mTempParentPointer->setNewChild(this->mTempChildPointer);
 	}
 	
 	this->mLastChange = (ChangeType)None;
 	this->mTempParentPointer = nullptr;
-	this->mTempChildPointer = nullptr;
+	this->mTempChildPointer.pChild = nullptr;
 }
 
 void Lobe::inputLobe(std::string Input, std::string& Output) {
 	for (size_t Index1 = 0; Index1 < Input.length(); Index1++) {
 		for (size_t Index2 = 0; Index2 < this->mInputNeurons.size(); Index2++) {
 			if (Input[Index1] == this->mInputNeurons[Index2]->getNeuronSymbol())
-				this->mInputNeurons[Index2]->Synapse(Output);
+				this->mInputNeurons[Index2]->stimulateNeuron(15, Output);
 		}
 	}
 }
 
 void Lobe::resetLobe(void) {
 	for (size_t Index = 0; Index < this->mAllNeurons.size(); Index++) {
-		this->mAllNeurons[Index]->individualReset();
+		this->mAllNeurons[Index]->resetNeuron();
 	}
 }

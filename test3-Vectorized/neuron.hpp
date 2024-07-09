@@ -2,222 +2,206 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <random>
+#include <string>
+#include <cmath>
 
-#define NumberOfConnections 10000
+//#define MaxNumberOfConnections 10000
 #define ThresholdRange 1000
+#define DecayConstant 2
 
 typedef enum IOType {
 	Input = 0, Transitive = 1, Output = 2
 } IOType;
 
+// typedef union Synapse {
+// 	Neuron* pChild;
+// 	int Strength;
+// } Synapse;
+
 class Neuron
 {
+
+typedef union Synapse {
+	Neuron* pChild;
+	int Strength;
+} Synapse;
+
 private:
+	//Neuron Values
+	unsigned int mThreshold;
+	int mBreakCount;
+
 	//IO Data Members
 	IOType mNeuronType;
 	char mNeuronSymbol;
-	bool mActive;
-
+	
 	//Neuron Connections
-	unsigned int mThreshold;
-	unsigned int mBreakCount;
-	unsigned int mNumberOfChildren;
-	Neuron* mpChildren[NumberOfConnections];
+	std::vector<Synapse> mChildren;
+	
 public:
 	//Constructors & Destructors
 	Neuron();
 	Neuron(Neuron* const Original);
 	~Neuron();
-
 	Neuron operator=(Neuron const Original);
 
 	//Setters
+	void setThreshold(unsigned int const nThreshold);
+	void setBreakCount(int const nBreakCount);
 	void setNeuronType(IOType const nNeuronType);
 	void setNeuronSymbol(char const nNeuronSymbol);
-	void setThreshold(unsigned int const nThreshold);
-	void setBreakCount(unsigned int const nBreakCount);
-	void setActivation(bool const nActivated);
-
-	void setChild(Neuron* const nChild);
-	void setChild(Neuron* const nChild, unsigned int const Index);
-	void setAllChildren(Neuron* const nChild);
+	void setNewChild(Synapse const nChild);
+	void setChild(Synapse const nChild, unsigned int const Index);
+	void deleteChild(unsigned int const Index);
 
 	//Getters
+	unsigned int getThreshold(void) const;
+	int getBreakCount(void) const;
 	IOType getNeuronType(void) const;
 	char getNeuronSymbol(void) const;
-	bool getActivation(void) const;
-	unsigned int getThreshold(void) const;
-	unsigned int getBreakCount(void) const;
 	unsigned int getNumberOfChildren(void) const;
-
-	Neuron* getChild(unsigned int const Index) const;
-	Neuron* getRandomChild(void) const;
-	unsigned int getFirstChildNullIndex(void) const;
-	unsigned int getChildIndex(Neuron* const sChild);
+	Synapse getChild(unsigned int const Index) const;
+	Synapse getRandomChild(void) const;
+	unsigned int getChildIndex(Synapse const sChild) const;
 
 	//Etc
-	void Synapse(std::string& Output);
-	void Reset(void);
-	void individualReset(void);
+	void stimulateNeuron(int stimulateStrength, std::string& Output);
+	void decayBreakCount(void);
+	void resetNeuron(void);
 };
 
+typedef union Synapse {
+	Neuron* pChild;
+	int Strength;
+} Synapse;
 
 //Constructors & Destructors
 Neuron::Neuron() {
+	this->mThreshold = 15; //rand() % ThresholdRange;
+	this->mBreakCount = 0;
+	
 	this->mNeuronType = IOType(rand() % 3);
 	this->mNeuronSymbol = char((rand() % (126-32)) + 32);
-	this->mActive = false;
-	this->mThreshold = rand() % ThresholdRange;
-	this->mBreakCount = 0;
-	this->mNumberOfChildren = 0;
-	this->setAllChildren(nullptr);
+
+	this->mChildren.resize(0);
 }
 Neuron::Neuron(Neuron* const Original) {
-	this->mNeuronType = Original->getNeuronType();
-	this->mNeuronSymbol = Original->getNeuronType();
-	this->mActive = Original->getActivation();
 	this->mThreshold = Original->getThreshold();
 	this->mBreakCount = Original->getBreakCount();
-	this->mNumberOfChildren = Original->getNumberOfChildren();
-	for (unsigned int Index = 0; Index < this->mNumberOfChildren; Index++) {
-		this->setChild(Original->getChild(Index), Index);
+
+	this->mNeuronType = Original->getNeuronType();
+	this->mNeuronSymbol = Original->getNeuronType();
+
+	for (unsigned int Index = 0; Index < this->mChildren.size(); Index++) {
+		this->mChildren[Index] = Original->mChildren[Index];
+		//this->setChild(Original->mChildren[Index]);
 	}
 }
-Neuron::~Neuron() {
-}
-
+Neuron::~Neuron() {}
 Neuron Neuron::operator=(Neuron const Original) {
-	this->mNeuronType = Original.getNeuronType();
-	this->mNeuronSymbol = Original.getNeuronType();
-	this->mActive = Original.getActivation();
 	this->mThreshold = Original.getThreshold();
 	this->mBreakCount = Original.getBreakCount();
-	this->mNumberOfChildren = Original.getNumberOfChildren();
-	for (unsigned int Index = 0; Index < this->mNumberOfChildren; Index++) {
-		this->setChild(Original.getChild(Index), Index);
+
+	this->mNeuronType = Original.getNeuronType();
+	this->mNeuronSymbol = Original.getNeuronType();
+
+	for (unsigned int Index = 0; Index < this->mChildren.size(); Index++) {
+		this->mChildren[Index] = Original.mChildren[Index];
+		//this->setChild(Original->mChildren[Index]);
 	}
 	return this;
 }
 
+
+
 //Setters
+void Neuron::setThreshold(unsigned int const nThreshold) {
+	this->mThreshold = nThreshold;
+}
+void Neuron::setBreakCount(int const nBreakCount) {
+	this->mBreakCount = nBreakCount;
+}
 void Neuron::setNeuronType(IOType const nNeuronType) {
 	this->mNeuronType = nNeuronType;
 }
 void Neuron::setNeuronSymbol(char const nNeuronSymbol) {
 	this->mNeuronSymbol = nNeuronSymbol;
 }
-void Neuron::setThreshold(unsigned int const nThreshold) {
-	this->mThreshold = nThreshold;
+void Neuron::setNewChild(Synapse const nChild) {
+	this->mChildren.push_back(nChild);
 }
-void Neuron::setBreakCount(unsigned int const nBreakCount) {
-	this->mBreakCount = nBreakCount;
-}
-void Neuron::setActivation(bool const nActivation) {
-	this->mActive = nActivation;
-}
-
-void Neuron::setChild(Neuron* const nChild) {
-	int Index = this->getFirstChildNullIndex();
-
-	if (nChild == nullptr && this->mpChildren[Index] != nullptr)
-		this->mNumberOfChildren--;
-	else if (nChild != nullptr && this->mpChildren[Index] == nullptr)
-		this->mNumberOfChildren++;
-
-	this->mpChildren[Index] = nChild;
-}
-
 // Ideally, DO NOT USE
-void Neuron::setChild(Neuron* const nChild, unsigned int const Index) {
-	if (nChild == nullptr && this->mpChildren[Index] != nullptr)
-		this->mNumberOfChildren--;
-	else if (nChild != nullptr && this->mpChildren[Index] == nullptr)
-		this->mNumberOfChildren++;
+void Neuron::setChild(Synapse const nChild, unsigned int const Index) {
+	this->mChildren[Index] = nChild;
+}
+void Neuron::deleteChild(unsigned int const Index) {
+	this->mChildren.erase(this->mChildren.begin() + Index);
+}
 
-	this->mpChildren[Index] = nChild;
-}
-void Neuron::setAllChildren(Neuron* const nChild) {
-	for (unsigned int Index = 0; Index < NumberOfConnections; Index++) {
-		this->mpChildren[Index] = nChild;
-	}
-}
+
 
 //Getters
+unsigned int Neuron::getThreshold(void) const {
+	return this->mThreshold;
+}
+int Neuron::getBreakCount(void) const {
+	return this->mBreakCount;
+}
 IOType Neuron::getNeuronType(void) const {
 	return this->mNeuronType;
 }
 char Neuron::getNeuronSymbol(void) const {
 	return this->mNeuronSymbol;
 }
-bool Neuron::getActivation(void) const {
-	return this->mActive;
-}
-unsigned int Neuron::getThreshold(void) const {
-	return this->mThreshold;
-}
-unsigned int Neuron::getBreakCount(void) const {
-	return this->mBreakCount;
-}
 unsigned int Neuron::getNumberOfChildren(void) const {
-	return this->mNumberOfChildren;
+	return this->mChildren.size();
 }
+Synapse Neuron::getChild(unsigned int const Index) const {
+	if (this->mChildren.size() > Index) {
+		return this->mChildren[Index];
+	}
+	
 
-Neuron* Neuron::getChild(unsigned int const Index) const {
-	return this->mpChildren[Index];
 }
-Neuron* Neuron::getRandomChild(void) const {
-	if (this->mNumberOfChildren > 0) {
-		return this->mpChildren[(rand() % this->mNumberOfChildren)];
+Synapse Neuron::getRandomChild(void) const {
+	if (this->mChildren.size() > 0) {
+		return this->mChildren[(rand() % this->mChildren.size())];
 	}
 	std::cerr << "Function getRandomChild() Error: No Children" << std::endl;
-	return nullptr;
+	return;
 }
-unsigned int Neuron::getFirstChildNullIndex(void) const {
-	for (unsigned int Index = 0; Index < NumberOfConnections; Index++) {
-		if (this->mpChildren[Index] == nullptr) {
+unsigned int Neuron::getChildIndex(Synapse const sChild) const {
+	for (unsigned int Index = 0; Index < this->mChildren.size(); Index++) {
+		if (this->mChildren[Index].pChild == sChild.pChild && this->mChildren[Index].Strength == sChild.Strength) {
 			return Index;
 		}
 	}
-	std::cerr << "Function getFirstChildNullIndex(): No Empty Children" << std::endl;
+	std::cerr << "Function getChildIndex(): No Child Found" << std::endl;
 	return -1;
 }
-unsigned int Neuron::getChildIndex(Neuron* const sChild) {
-	for (unsigned int Index = 0; Index < NumberOfConnections; Index++) {
-		if (this->mpChildren[Index] == sChild) {
-			return Index;
-		}
-	}
-	std::cerr << "Function getFirstChildNullIndex(): No Empty Children" << std::endl;
-	return -1;
-}
+
 
 
 //Etc
-void Neuron::Synapse(std::string& Output) {
-	if (this->mBreakCount >= this->mThreshold && this->mActive) {
-		this->mBreakCount = 0;
-		this->mActive = false;
+void Neuron::stimulateNeuron(int stimulateStrength, std::string& Output) {
+	this->mBreakCount =+ stimulateStrength;
+	if (this->mBreakCount >= this->mThreshold) {
+		this->mBreakCount =- (this->mBreakCount - 5);
 		if (this->mNeuronType == (IOType)2) {
 			Output.push_back(this->mNeuronSymbol);
 		}
-		for (unsigned int Index = 0; Index < NumberOfConnections && this->mpChildren[Index] != nullptr; Index++) {
-			this->mpChildren[Index]->Synapse(Output);
+		for (unsigned int Index = 0; Index < this->mChildren.size(); Index++) {
+			this->mChildren[Index].pChild->stimulateNeuron(this->mChildren[Index].Strength, Output);
 		}
 	}
-	else
-		this->mBreakCount++;
 }
-void Neuron::Reset(void) {
-	this->mBreakCount = 0;
-	this->mActive = true;
-
-	for (unsigned int Index = 0; Index < this->mNumberOfChildren; Index++) {
-		if ((this->mpChildren[Index] != nullptr) && (this->mpChildren[Index] != this))
-			this->mpChildren[Index]->Reset();
+void Neuron::decayBreakCount(void) {
+	if (this->mBreakCount != 0) {
+		this->mBreakCount = static_cast<int>(std::round(this->mBreakCount/DecayConstant));
 	}
 }
-void Neuron::individualReset(void) {
+void Neuron::resetNeuron(void) {
 	this->mBreakCount = 0;
-	this->mActive = true;
 }
