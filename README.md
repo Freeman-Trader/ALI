@@ -34,3 +34,4 @@ Synapses are what connect neurons to other cells such as neurons and muscles. Th
 * [1] [NIH](https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-life-and-death-neuron)
 * [2] [NIH](https://www.ncbi.nlm.nih.gov/books/NBK11146/)
 * [3] [Wikipedia](https://en.wikipedia.org/wiki/Neuron)
+* (https://youtu.be/kWomJWfNWPM)
