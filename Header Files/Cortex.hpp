@@ -4,15 +4,15 @@
 #include <iostream>
 #include <random>
 
-#include ".\Neuron.hpp"
+#include "./Neuron.hpp"
 
 const unsigned int CORTEX_ROWS = 1000;
 const unsigned int CORTEX_COLS = 1000;
 const unsigned int MOD_DELTA = 3;
 
 typedef struct Change {
-	Neuron* Neuron;
-	Synapse* Synapse;
+	Neuron* pNeuron;
+	Synapse* pSynapse;
 	int Delta;
 } Change;
 
@@ -81,16 +81,16 @@ int Cortex::getRandomDelta(void) {
 
 void Cortex::randomChange(void) {
 	//Get Changes
-	this->mLastChange.Synapse = this->mLastChange.Neuron->getSynapse(this->getRandomSynapseIndex(this->getRandomNeuron()));
+	this->mLastChange.pSynapse = this->mLastChange.pNeuron->getSynapse(this->getRandomSynapseIndex(this->getRandomNeuron()));
 	this->mLastChange.Delta = this->getRandomDelta();
 
 	//Actual Change
-	this->mLastChange.Synapse->SynapticStrength += this->mLastChange.Delta;
+	this->mLastChange.pSynapse->SynapticStrength += this->mLastChange.Delta;
 }
 
 void Cortex::undoChange(void) {
 	//Undo Change
-	this->mLastChange.Synapse->SynapticStrength -= this->mLastChange.Delta;
+	this->mLastChange.pSynapse->SynapticStrength -= this->mLastChange.Delta;
 }
 
 unsigned int Cortex::gradeOutput(std::string const desiredOutput, std::string const actualOutput) {
@@ -177,7 +177,7 @@ Change Cortex::getLastChange(void) const {
 
 //Etc
 void Cortex::train(std::string input, std::string desiredOutput) {
-	int score = 0;
+	unsigned int score = 0;
 	std::string actualOutput;
 	while(actualOutput != desiredOutput) {
 		actualOutput.clear();
@@ -209,7 +209,8 @@ std::string Cortex::stimulate(std::string const input) {
 			}
 		}
 	}
-
+	
+	return output;
 }
 
 void Cortex::resetCortex(void) {

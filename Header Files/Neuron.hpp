@@ -2,11 +2,14 @@
 #pragma once
 
 #include <cmath>
+#include <iostream>
 #include <string>
 #include <vector>
 
 #define REFRACTORY 3
 #define DECAY 2
+
+class Neuron; // Forward declaration for Synapse definition
 
 typedef enum NeuronType {
 	Sensory = 0, Inter = 1, Motor = 2
@@ -31,7 +34,7 @@ private:
 public:
 	//Constructors & Destructor
 	Neuron();
-	Neuron(NeuronType nNeuronType, char nNeuronSymbol, int nThreshold, int nVoltage, int nPotential);
+	Neuron(NeuronType nNeuronType, char nNeuronSymbol, int nThreshold, int nVoltage);
 	Neuron(Neuron* const Original);
 	Neuron operator=(Neuron const Original);
 	~Neuron();
@@ -74,7 +77,7 @@ Neuron::Neuron() {
 	
 	this->mSynapses.resize(0);
 }
-Neuron::Neuron(NeuronType nNeuronType, char nNeuronSymbol, int nThreshold, int nVoltage, int nPotential) {
+Neuron::Neuron(NeuronType nNeuronType, char nNeuronSymbol, int nThreshold, int nVoltage) {
 	this->mNeuronType = nNeuronType;
 	this->mNeuronSymbol = nNeuronSymbol;
 	this->mThreshold = nThreshold;
@@ -169,14 +172,14 @@ Synapse* Neuron::getSynapse(unsigned int const Index) const {
 		return this->mSynapses[Index];
 	}
 	std::cerr << "Function getSynapse() Error: No Synapse" << std::endl;
-	return;
+	return nullptr;
 }
 Synapse* Neuron::getRandomSynapse(void) const {
 	if(this->mSynapses.size() > 0) {
 		return this->mSynapses[(rand() % this->mSynapses.size())];
 	}
 	std::cerr << "Function getRandomSynapse() Error: No Synapse" << std::endl;
-	return;
+	return nullptr;
 }
 
 
