@@ -6,8 +6,8 @@
 
 #include "./Neuron.hpp"
 
-const unsigned int CORTEX_ROWS = 1000;
-const unsigned int CORTEX_COLS = 1000;
+const unsigned int CORTEX_ROWS = 100;
+const unsigned int CORTEX_COLS = 100;
 const unsigned int MOD_DELTA = 3;
 
 typedef struct Change {
@@ -31,7 +31,7 @@ private:
 	
 	//Private Change Functions
 	Neuron* getRandomNeuron(void);
-	unsigned int getRandomSynapseIndex(Neuron* const pNeuron);
+	Synapse* getRandomSynapse(Neuron* const pNeuron); 
 	int getRandomDelta(void);
 	void randomChange(void);
 	void undoChange(void);
@@ -68,8 +68,8 @@ Neuron* Cortex::getRandomNeuron(void) {
 	return this->mInterNeurons[rand() % CORTEX_ROWS][rand() % CORTEX_COLS];
 }
 
-unsigned int Cortex::getRandomSynapseIndex(Neuron* const pNeuron) {
-	return (unsigned int)rand() % pNeuron->getNumberOfSynapses();
+Synapse* Cortex::getRandomSynapse(Neuron* const pNeuron) {
+	return pNeuron->getSynapse(rand() % pNeuron->getNumberOfSynapses());
 }
 
 int Cortex::getRandomDelta(void) {
@@ -81,9 +81,10 @@ int Cortex::getRandomDelta(void) {
 
 void Cortex::randomChange(void) {
 	//Get Changes
-	this->mLastChange.pSynapse = this->mLastChange.pNeuron->getSynapse(this->getRandomSynapseIndex(this->getRandomNeuron()));
+	this->mLastChange.pNeuron = this->getRandomNeuron();
+	this->mLastChange.pSynapse = this->getRandomSynapse(this->mLastChange.pNeuron);
 	this->mLastChange.Delta = this->getRandomDelta();
-
+	
 	//Actual Change
 	this->mLastChange.pSynapse->SynapticStrength += this->mLastChange.Delta;
 }
@@ -115,12 +116,13 @@ Cortex::Cortex() {
 	}
 	
 	for(unsigned int Row = 0; Row < CORTEX_ROWS; Row++) {
+		std::vector<Neuron*> nArray;
 		for(unsigned int Column = 0; Column < CORTEX_COLS; Column++) {
 			Neuron* nNeuron = new Neuron;
 			nNeuron->setNeuronType((NeuronType)1);
-			
-			this->mInterNeurons[Row].push_back(nNeuron);
+			nArray.push_back(nNeuron);
 		}
+		this->mInterNeurons.push_back(nArray);
 	}
 	
 	for(unsigned int Index = 0; Index < 128; Index++) {
@@ -182,18 +184,26 @@ void Cortex::train(std::string input, std::string desiredOutput) {
 	while(actualOutput != desiredOutput) {
 		actualOutput.clear();
 		
+		this->randomChange();
+		
 		for(unsigned int inputIndex = 0; inputIndex < input.size(); inputIndex++) {
 			for(unsigned int NeuronIndex = 0; NeuronIndex < this->mSensoryNeurons.size(); NeuronIndex++) {
-				if(this->mSensoryNeurons[NeuronIndex]->getNeuronType() == (NeuronType)0 && input[inputIndex] == this->mSensoryNeurons[NeuronIndex]->getNeuronSymbol()) {
+				if(this->mSensoryNeurons[NeuronIndex]->getNeuronType() == (NeuronType)0 && input[inputIndex] == this->mSensoryNeurons[NeuronIndex]->getNeuronSymbol()) {					
 					this->mSensoryNeurons[NeuronIndex]->depolarize(actualOutput, this->mSensoryNeurons[NeuronIndex]->getThreshold());
 				}
 			}
 		}
 		
-		if(score < this->gradeOutput(desiredOutput, actualOutput))
-			score = this->gradeOutput(desiredOutput, actualOutput);
-		else
+		unsigned int tempScore = this->gradeOutput(desiredOutput, actualOutput);
+		
+		// Optimize in the future
+		if(tempScore > score) {
+			score = tempScore;
+			std::cout << "Score Improved: " << score << std::endl;
+		}
+		else if(tempScore < score) {
 			this->undoChange();
+		}
 			
 		this->resetCortex();
 	}

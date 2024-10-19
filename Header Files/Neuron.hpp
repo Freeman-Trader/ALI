@@ -63,7 +63,7 @@ public:
 	Synapse* getRandomSynapse(void) const;
 
 	//Etc
-	void depolarize(std::string& Output, int SynapticStrength);
+	void depolarize(std::string& Output, int const SynapticStrength);
 	void repolarize(void);
 	void resetNeuron(void);
 };
@@ -185,7 +185,7 @@ Synapse* Neuron::getRandomSynapse(void) const {
 
 
 //Etc
-void Neuron::depolarize(std::string& Output, int SynapticStrength) {
+void Neuron::depolarize(std::string& Output, int const SynapticStrength) {
 	this->mVoltage += SynapticStrength;
 	
 	if(this->mVoltage >= this->mThreshold) {
