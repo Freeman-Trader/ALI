@@ -4,14 +4,21 @@
 int main(void) {
 	Cortex ALI;
 	
-    std::string str("hi");    
-	ALI.train(str, str);
+    std::string input, output;
+    input = "hi";
+    output = "hello";
+	ALI.train(input, output);
 	
-	std::cout << "---Finished Training---" << std::endl;
+	std::cout << "---Finished Lesson---" << std::endl;
 	
-	std::cout << "Input: " << str << std::endl;
-    str = ALI.stimulate(str);
-    std::cout << "Output: " << str;
-
+	while (true) {
+        std::cout << "Input: ";
+    	std::cin >> input;
+        output = ALI.stimulate(input);
+        std::cout << "Output: " << output << std::endl;
+        input.clear();
+        output.clear();
+    }
+    
 	return 0;
 }

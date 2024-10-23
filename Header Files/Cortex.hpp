@@ -8,8 +8,8 @@
 
 #include "./Neuron.hpp"
 
-const unsigned int CORTEX_ROWS = 1;
-const unsigned int CORTEX_COLS = 1;
+const unsigned int CORTEX_ROWS = 5;
+const unsigned int CORTEX_COLS = 5;
 const unsigned int MOD_DELTA = 3;
 
 typedef struct Change {
@@ -72,7 +72,6 @@ void Cortex::connectSynapseLayers(std::vector<Neuron*> left, std::vector<Neuron*
 Neuron* Cortex::getRandomNeuron(void) {
 	if(this->mLighthouses.size() > 0) {
 		return this->mLighthouses[rand() % this->mLighthouses.size()];
-		std::cout << "Lighthouse Used" << std::endl;
 	}
 	return this->mInterNeurons[rand() % CORTEX_ROWS][rand() % CORTEX_COLS];
 }
@@ -105,14 +104,26 @@ void Cortex::undoChange(void) {
 
 int Cortex::gradeOutput(std::string const desiredOutput, std::string const actualOutput) {
 
-	int score = desiredOutput.size() - abs(desiredOutput.size() - actualOutput.size());
+	int score = 0; //desiredOutput.size() - abs(desiredOutput.size() - actualOutput.size());
 	
-	for(unsigned int Index = 0; Index < desiredOutput.size() && Index < actualOutput.size(); Index++) {
-		if(desiredOutput[Index] == actualOutput[Index]) {
-			score++;
+	if(desiredOutput.size() >= actualOutput.size()) {
+		for(unsigned int Index = 0; Index < desiredOutput.size() && Index < actualOutput.size(); Index++) {
+			if(desiredOutput[Index] == actualOutput[Index]) {
+				score++;
+			}
+			else {
+				score--;
+			}
 		}
-		else {
-			score--;
+	}
+	else {
+		for(unsigned int Index = 0; Index < desiredOutput.size() || Index < actualOutput.size(); Index++) {
+			if(Index < desiredOutput.size() && Index < actualOutput.size() && desiredOutput[Index] == actualOutput[Index]) {
+				score++;
+			}
+			else {
+				score--;
+			}
 		}
 	}
 	
@@ -120,6 +131,7 @@ int Cortex::gradeOutput(std::string const desiredOutput, std::string const actua
 }
 
 Cortex::Cortex() {
+	std::cout << "Starting Initialization of Cortex" << std::endl;
 	//Initializing and Allocating All Neurons
 	for(unsigned int Index = 97; Index < 123; Index++) {
 		Neuron* nNeuron = new Neuron;
@@ -155,6 +167,7 @@ Cortex::Cortex() {
 	this->connectSynapseLayers(this->mInterNeurons[this->mInterNeurons.size() - 1], this->mMotorNeurons);
 	
 	this->mLighthouses.clear();
+	std::cout << "Finished Initialization of Cortex" << std::endl;
 }
 Cortex::~Cortex() {
 	//Free Sensory Neurons
@@ -218,10 +231,10 @@ void Cortex::train(std::string input, std::string desiredOutput) {
 		}
 		else if(tempScore < score) {
 			this->undoChange();
-			//std::cout << "Score Rejected" << std::endl;
 		}
 		this->resetCortex();
 	}
+	std::cout << "Training Finished" << std::endl;
 }
 
 std::string Cortex::stimulate(std::string const input) {
@@ -234,6 +247,8 @@ std::string Cortex::stimulate(std::string const input) {
 			}
 		}
 	}
+	
+	this->resetCortex();
 	
 	return output;
 }
