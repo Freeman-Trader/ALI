@@ -64,6 +64,7 @@ public:
 
 	//Etc
 	void depolarize(std::string& Output, int const SynapticStrength);
+	void depolarize(std::string& Output, int const SynapticStrength, std::vector<Neuron*>& Lighthouses);
 	void repolarize(void);
 	void resetNeuron(void);
 };
@@ -189,7 +190,7 @@ void Neuron::depolarize(std::string& Output, int const SynapticStrength) {
 	this->mVoltage += SynapticStrength;
 	
 	if(this->mVoltage >= this->mThreshold) {
-		this->mVoltage = -std::round(this->mVoltage/REFRACTORY);
+		this->mVoltage = -std::round(this->mVoltage / REFRACTORY);
 		
 		if(this->mNeuronType == (NeuronType)2) {
 			Output.push_back(this->mNeuronSymbol);
@@ -200,9 +201,27 @@ void Neuron::depolarize(std::string& Output, int const SynapticStrength) {
 		}
 	}
 }
+void Neuron::depolarize(std::string& Output, int const SynapticStrength, std::vector<Neuron*>& Lighthouses) {
+	this->mVoltage += SynapticStrength;
+	
+	if(this->mVoltage >= this->mThreshold) {
+		this->mVoltage = -std::round(this->mVoltage / REFRACTORY);
+		
+		if(this->mNeuronType == (NeuronType)2) {
+			Output.push_back(this->mNeuronSymbol);
+		}
+		else {
+			Lighthouses.push_back(this);
+		}
+		
+		for(unsigned int Index = 0; Index < this->mSynapses.size(); Index++) {
+			this->mSynapses[Index]->PostSynapticNeuron->depolarize(Output, this->mSynapses[Index]->SynapticStrength, Lighthouses);
+		}
+	}
+}
 void Neuron::repolarize(void) {
 	if (this->mVoltage != 0) {
-		this->mVoltage = static_cast<int>(std::round(this->mVoltage/DECAY));
+		this->mVoltage = static_cast<int>(std::round(this->mVoltage / DECAY));
 	}
 }
 void Neuron::resetNeuron(void) {

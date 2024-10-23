@@ -1,13 +1,15 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <random>
 
 #include "./Neuron.hpp"
 
-const unsigned int CORTEX_ROWS = 100;
-const unsigned int CORTEX_COLS = 100;
+const unsigned int CORTEX_ROWS = 1;
+const unsigned int CORTEX_COLS = 1;
 const unsigned int MOD_DELTA = 3;
 
 typedef struct Change {
@@ -20,6 +22,9 @@ class Cortex {
 private:
 	//Change (Potential make vector to have a log of changes)
 	Change mLastChange;
+	
+	//View Design Philosophy - The Lighthouse Technique
+	std::vector<Neuron*> mLighthouses;
 
 	//Neuron Arrays
 	std::vector<std::vector<Neuron*>> mInterNeurons;
@@ -37,7 +42,7 @@ private:
 	void undoChange(void);
 	
 	//Private Train Fuctions
-	unsigned int gradeOutput(std::string const desiredOutput, std::string const actualOutput);
+	int gradeOutput(std::string const desiredOutput, std::string const actualOutput);
 
 public:
 	//Constructor & Destructor
@@ -65,6 +70,10 @@ void Cortex::connectSynapseLayers(std::vector<Neuron*> left, std::vector<Neuron*
 }
 
 Neuron* Cortex::getRandomNeuron(void) {
+	if(this->mLighthouses.size() > 0) {
+		return this->mLighthouses[rand() % this->mLighthouses.size()];
+		std::cout << "Lighthouse Used" << std::endl;
+	}
 	return this->mInterNeurons[rand() % CORTEX_ROWS][rand() % CORTEX_COLS];
 }
 
@@ -94,12 +103,17 @@ void Cortex::undoChange(void) {
 	this->mLastChange.pSynapse->SynapticStrength -= this->mLastChange.Delta;
 }
 
-unsigned int Cortex::gradeOutput(std::string const desiredOutput, std::string const actualOutput) {
-	unsigned int score = desiredOutput.size() - (desiredOutput.size() - actualOutput.size());
+int Cortex::gradeOutput(std::string const desiredOutput, std::string const actualOutput) {
+
+	int score = desiredOutput.size() - abs(desiredOutput.size() - actualOutput.size());
 	
 	for(unsigned int Index = 0; Index < desiredOutput.size() && Index < actualOutput.size(); Index++) {
-		if(desiredOutput[Index] == actualOutput[Index])
+		if(desiredOutput[Index] == actualOutput[Index]) {
 			score++;
+		}
+		else {
+			score--;
+		}
 	}
 	
 	return score;
@@ -107,7 +121,7 @@ unsigned int Cortex::gradeOutput(std::string const desiredOutput, std::string co
 
 Cortex::Cortex() {
 	//Initializing and Allocating All Neurons
-	for(unsigned int Index = 0; Index < 128; Index++) {
+	for(unsigned int Index = 97; Index < 123; Index++) {
 		Neuron* nNeuron = new Neuron;
 		nNeuron->setNeuronType((NeuronType)0);
 		nNeuron->setNeuronSymbol((char)Index);
@@ -125,7 +139,7 @@ Cortex::Cortex() {
 		this->mInterNeurons.push_back(nArray);
 	}
 	
-	for(unsigned int Index = 0; Index < 128; Index++) {
+	for(unsigned int Index = 97; Index < 123; Index++) {
 		Neuron* nNeuron = new Neuron;
 		nNeuron->setNeuronType((NeuronType)2);
 		nNeuron->setNeuronSymbol((char)Index);
@@ -139,6 +153,8 @@ Cortex::Cortex() {
 		this->connectSynapseLayers(this->mInterNeurons[Row - 1], this->mInterNeurons[Row]);
 	}
 	this->connectSynapseLayers(this->mInterNeurons[this->mInterNeurons.size() - 1], this->mMotorNeurons);
+	
+	this->mLighthouses.clear();
 }
 Cortex::~Cortex() {
 	//Free Sensory Neurons
@@ -179,32 +195,31 @@ Change Cortex::getLastChange(void) const {
 
 //Etc
 void Cortex::train(std::string input, std::string desiredOutput) {
-	unsigned int score = 0;
+	int score = 0;
 	std::string actualOutput;
 	while(actualOutput != desiredOutput) {
 		actualOutput.clear();
-		
 		this->randomChange();
+		this->mLighthouses.clear();
 		
 		for(unsigned int inputIndex = 0; inputIndex < input.size(); inputIndex++) {
 			for(unsigned int NeuronIndex = 0; NeuronIndex < this->mSensoryNeurons.size(); NeuronIndex++) {
-				if(this->mSensoryNeurons[NeuronIndex]->getNeuronType() == (NeuronType)0 && input[inputIndex] == this->mSensoryNeurons[NeuronIndex]->getNeuronSymbol()) {					
-					this->mSensoryNeurons[NeuronIndex]->depolarize(actualOutput, this->mSensoryNeurons[NeuronIndex]->getThreshold());
+				if(this->mSensoryNeurons[NeuronIndex]->getNeuronType() == (NeuronType)0 && input[inputIndex] == this->mSensoryNeurons[NeuronIndex]->getNeuronSymbol()) {
+					this->mSensoryNeurons[NeuronIndex]->depolarize(actualOutput, this->mSensoryNeurons[NeuronIndex]->getThreshold(), this->mLighthouses);
 				}
 			}
 		}
-		
-		unsigned int tempScore = this->gradeOutput(desiredOutput, actualOutput);
-		
-		// Optimize in the future
+				
+		int tempScore = this->gradeOutput(desiredOutput, actualOutput);
 		if(tempScore > score) {
 			score = tempScore;
 			std::cout << "Score Improved: " << score << std::endl;
+			std::cout << actualOutput << std::endl;
 		}
 		else if(tempScore < score) {
 			this->undoChange();
+			//std::cout << "Score Rejected" << std::endl;
 		}
-			
 		this->resetCortex();
 	}
 }
