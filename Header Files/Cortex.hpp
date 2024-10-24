@@ -8,9 +8,11 @@
 
 #include "./Neuron.hpp"
 
-const unsigned int CORTEX_ROWS = 5;
-const unsigned int CORTEX_COLS = 5;
+const unsigned int CORTEX_ROWS = 10;
+const unsigned int CORTEX_COLS = 10;
 const unsigned int MOD_DELTA = 3;
+//View Design Philosophy - Hiking In The Dark
+const unsigned int LEARNING_VARIANCE = 3;
 
 typedef struct Change {
 	Neuron* pNeuron;
@@ -20,7 +22,7 @@ typedef struct Change {
 
 class Cortex {
 private:
-	//Change (Potential make vector to have a log of changes)
+	//Last Change (Potential make vector to have a log of changes)
 	Change mLastChange;
 	
 	//View Design Philosophy - The Lighthouse Technique
@@ -112,7 +114,7 @@ int Cortex::gradeOutput(std::string const desiredOutput, std::string const actua
 				score++;
 			}
 			else {
-				score--;
+				score=-5;
 			}
 		}
 	}
@@ -122,7 +124,7 @@ int Cortex::gradeOutput(std::string const desiredOutput, std::string const actua
 				score++;
 			}
 			else {
-				score--;
+				score=-5;
 			}
 		}
 	}
