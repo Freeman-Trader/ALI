@@ -8,9 +8,10 @@
 
 #include "./Neuron.hpp"
 
-const unsigned int CORTEX_ROWS = 10;
-const unsigned int CORTEX_COLS = 10;
+const unsigned int CORTEX_ROWS = 20;
+const unsigned int CORTEX_COLS = 20;
 const unsigned int MOD_DELTA = 3;
+const unsigned int PENALTY = 10;
 //View Design Philosophy - Hiking In The Dark
 const unsigned int LEARNING_VARIANCE = 3;
 
@@ -104,38 +105,34 @@ void Cortex::undoChange(void) {
 	this->mLastChange.pSynapse->SynapticStrength -= this->mLastChange.Delta;
 }
 
+// Zero is the maximum score
 int Cortex::gradeOutput(std::string const desiredOutput, std::string const actualOutput) {
+    int score = desiredOutput.size();
 
-	int score = 0; //desiredOutput.size() - abs(desiredOutput.size() - actualOutput.size());
-	
-	if(desiredOutput.size() >= actualOutput.size()) {
-		for(unsigned int Index = 0; Index < desiredOutput.size() && Index < actualOutput.size(); Index++) {
-			if(desiredOutput[Index] == actualOutput[Index]) {
-				score++;
-			}
-			else {
-				score=-5;
-			}
-		}
-	}
-	else {
-		for(unsigned int Index = 0; Index < desiredOutput.size() || Index < actualOutput.size(); Index++) {
-			if(Index < desiredOutput.size() && Index < actualOutput.size() && desiredOutput[Index] == actualOutput[Index]) {
-				score++;
-			}
-			else {
-				score=-5;
-			}
-		}
-	}
-	
-	return score;
+    // Check the minimum length to compare
+    size_t minLength = std::min(desiredOutput.size(), actualOutput.size());
+
+    // Compare characters up to the minimum length
+    for (size_t index = 0; index < minLength; ++index) {
+        if (desiredOutput[index] == actualOutput[index]) {
+            score--; // Correct character
+        } else {
+            score += PENALTY; // Incorrect character
+        }
+    }
+
+    // Add penalty for any additional characters in actualOutput
+    if (actualOutput.size() > desiredOutput.size()) {
+        score += (actualOutput.size() - desiredOutput.size()) * PENALTY; // Penalty for extra characters
+    }
+
+    return score;
 }
 
 Cortex::Cortex() {
 	std::cout << "Starting Initialization of Cortex" << std::endl;
 	//Initializing and Allocating All Neurons
-	for(unsigned int Index = 97; Index < 123; Index++) {
+	for(unsigned int Index = 40; Index < 58; Index++) {
 		Neuron* nNeuron = new Neuron;
 		nNeuron->setNeuronType((NeuronType)0);
 		nNeuron->setNeuronSymbol((char)Index);
@@ -153,7 +150,7 @@ Cortex::Cortex() {
 		this->mInterNeurons.push_back(nArray);
 	}
 	
-	for(unsigned int Index = 97; Index < 123; Index++) {
+	for(unsigned int Index = 40; Index < 58; Index++) {
 		Neuron* nNeuron = new Neuron;
 		nNeuron->setNeuronType((NeuronType)2);
 		nNeuron->setNeuronSymbol((char)Index);
@@ -210,9 +207,9 @@ Change Cortex::getLastChange(void) const {
 
 //Etc
 void Cortex::train(std::string input, std::string desiredOutput) {
-	int score = 0;
+	int score = desiredOutput.size();
 	std::string actualOutput;
-	while(actualOutput != desiredOutput) {
+	while(score != 0) {
 		actualOutput.clear();
 		this->randomChange();
 		this->mLighthouses.clear();
@@ -225,18 +222,19 @@ void Cortex::train(std::string input, std::string desiredOutput) {
 			}
 		}
 				
+				
 		int tempScore = this->gradeOutput(desiredOutput, actualOutput);
-		if(tempScore > score) {
+		
+		if(tempScore < score) {
 			score = tempScore;
 			std::cout << "Score Improved: " << score << std::endl;
 			std::cout << actualOutput << std::endl;
 		}
-		else if(tempScore < score) {
+		else if(tempScore > score) {
 			this->undoChange();
 		}
 		this->resetCortex();
 	}
-	std::cout << "Training Finished" << std::endl;
 }
 
 std::string Cortex::stimulate(std::string const input) {
